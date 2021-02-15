@@ -21,3 +21,7 @@
    - s390x
 - pattern: coreos.ignition.journald-log
   tracker: https://github.com/coreos/coreos-assembler/issues/1173
+- pattern: ext.config.root-reprovision.luks
+  tracker: Testing dev error
+  arches:
+   - ppc64le

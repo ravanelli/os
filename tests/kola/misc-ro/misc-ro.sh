@@ -66,10 +66,6 @@ echo "ok have /etc/yum.repos.d"
 
 # check if RHEL version encoded in RHCOS build version matches /etc/os-release
 source /etc/os-release
-if [ "${RHEL_VERSION//.}" != "$(echo "${VERSION}" | awk -F "." '{print $2}')" ]; then
-  fatal "error: RHEL version does not match"
-fi
-echo "ok RHEL version matches"
 
 # check that we are not including the kernel headers on the host
 # See:
@@ -133,13 +129,6 @@ echo "ok iSCSI initiator name"
 rpm -q conntrack-tools
 test ! -f /usr/lib/systemd/system/conntrackd.service
 echo "ok conntrack tools without daemon"
-
-# Let's make sure the NetworkManager we use is one of the one-off
-# rebuilds while we're following RHEL 8.3.
-if [[ ! $(rpm -q NetworkManager) =~ 'rhaos4.7' ]]; then
-    fatal "NetworkManager package changed from rhaos4.7 branch. Needs investigation."
-fi
-echo "ok NetworkManager package comes from rhaos4.7 branch."
 
 # Ensure NM's internal DHCP client runs by default
 if ! journalctl -b 0 -u NetworkManager --grep=dhcp | grep -q "Using DHCP client 'internal'"; then
