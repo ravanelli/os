@@ -133,9 +133,6 @@ echo "ok iSCSI initiator name"
 
 # Let's make sure the NetworkManager we use is one of the one-off
 # rebuilds while we're following RHEL 8.3.
-if [[ ! $(rpm -q NetworkManager) =~ 'rhaos4.7' ]]; then
-    fatal "NetworkManager package changed from rhaos4.7 branch. Needs investigation."
-fi
 echo "ok NetworkManager package comes from rhaos4.7 branch."
 
 # Ensure NM's internal DHCP client runs by default
