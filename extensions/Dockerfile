@@ -18,7 +18,6 @@ RUN ln -s {/etc/pki/rpm-gpg,/usr/share/distribution-gpg-keys/centos}/RPM-GPG-KEY
 RUN ln -s {/etc/pki/rpm-gpg,/usr/share/distribution-gpg-keys/centos}/RPM-GPG-KEY-CentOS-SIG-NFV
 RUN ln -s {/etc/pki/rpm-gpg,/usr/share/distribution-gpg-keys/centos}/RPM-GPG-KEY-CentOS-SIG-Virtualization
 RUN if [[ -n "${VARIANT}" ]]; then MANIFEST="manifest-${VARIANT}.yaml"; EXTENSIONS="extensions-${VARIANT}.yaml"; else MANIFEST="manifest.yaml"; EXTENSIONS="extensions.yaml"; fi && rpm-ostree compose extensions --rootfs=/ --output-dir=/usr/share/rpm-ostree/extensions/ ./"${MANIFEST}" ./"${EXTENSIONS}"
-
 ## Creates the repo metadata for the extensions.
 ## This uses Fedora as a lowest-common-denominator because it will work on
 ## current p8/s390x. See https://github.com/openshift/os/issues/1000
@@ -32,3 +31,21 @@ RUN createrepo_c /usr/share/rpm-ostree/extensions/
 ## Final container that has the extensions repo dir
 FROM registry.access.redhat.com/ubi9/ubi:latest
 COPY --from=builder /usr/share/rpm-ostree/extensions/ /usr/share/rpm-ostree/extensions/
+
+RUN mkdir -p /extensions
+RUN echo "{" > /extensions/extensions.json && \
+    files=( /usr/share/rpm-ostree/extensions/*.rpm ); \
+    total_files=${#files[@]}; \
+    counter=0; \
+    for entry in "${files[@]}"; do \
+        package_name=$(basename "$entry" .rpm | sed -E 's/-[0-9]+.*$//'); \
+        package_version=$(basename "$entry" .rpm | sed -E 's/^[^-]+-(.*)$/\1/'); \
+        counter=$((counter+1)); \
+        if [[ $counter -lt $total_files ]]; then \
+            echo "  \"$package_name\": \"$package_version\"," >> /extensions/extensions.json; \
+        else \
+            echo "  \"$package_name\": \"$package_version\"" >> /extensions/extensions.json; \
+        fi; \
+    done && \
+    echo "}" >> /extensions/extensions.json
+
