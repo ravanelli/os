@@ -35,3 +35,6 @@ COPY --from=builder /usr/share/rpm-ostree/extensions/ /usr/share/rpm-ostree/exte
 # Make this the last layer, this is similar to the metalayer trick in the node
 # image, but this one is specific to rpm-ostree extensions.
 COPY --from=builder /usr/share/rpm-ostree/extensions.json /usr/share/rpm-ostree/extensions.json
+
+RUN ls usr/share/rpm-ostree/extensions/ | grep kernel
+
